@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>上郷バス停</title>
+  <meta name="description" content="都営バス 梅76丙 上郷バス停の時刻表">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#E60174">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="上郷バス">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink: #E60174;
+      --pink-light: #fce8f3;
+      --bg: #f8f8f7;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-sub: #666;
+      --text-muted: #999;
+      --border: rgba(0,0,0,0.08);
+      --radius: 16px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111;
+        --surface: #1e1e1e;
+        --text: #f0f0f0;
+        --text-sub: #aaa;
+        --text-muted: #666;
+        --border: rgba(255,255,255,0.08);
+        --pink-light: #2a0014;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 20px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stop-info { display: flex; align-items: center; gap: 10px; }
+
+    .route-badge {
+      background: var(--pink);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.03em;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .refresh-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: var(--text-sub);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .refresh-btn:active { opacity: 0.6; }
+    .refresh-btn svg { width: 14px; height: 14px; }
+
+    .updated {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 8px 20px 0;
+    }
+
+    main {
+      flex: 1;
+      padding: 16px 20px 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .dir-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 16px;
+      min-height: 200px;
+    }
+
+    .dir-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .dir-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .next-time {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .next-mins {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--pink);
+      margin-top: 4px;
+      margin-bottom: 12px;
+    }
+
+    .upcoming { display: flex; flex-direction: column; gap: 5px; }
+
+    .upcoming-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .upcoming-mins {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .empty {
+      font-size: 13px;
+      color: var(--text-muted);
+      padding-top: 4px;
+    }
+
+    .loading-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .error-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 2rem;
+      color: #c0392b;
+      font-size: 14px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinning { animation: spin 1s linear infinite; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="stop-info">
+    <span class="route-badge">梅76丙</span>
+    <h1>上郷</h1>
+  </div>
+  <button class="refresh-btn" id="refresh-btn" onclick="load()" aria-label="更新">
+    <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+      <path d="M3 3v5h5"/>
+    </svg>
+    更新
+  </button>
+</header>
+
+<div class="updated" id="updated"></div>
+
+<main id="main">
+  <div class="loading-state">読み込み中...</div>
+</main>
+
+<script>
+const STOP_ID = "mdb-3175-part-07:0350";
+const API = `https://api.transit.ls8h.com/api/v1/stations/${encodeURIComponent(STOP_ID)}/departures`;
+
+function nowSecs() {
+  const n = new Date();
+  return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+}
+
+function secsToHHMM(s) {
+  const norm = ((s % 86400) + 86400) % 86400;
+  const h = Math.floor(norm / 3600);
+  const m = Math.floor((norm % 3600) / 60);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+function minsUntil(depSecs, curSecs) {
+  let diff = depSecs - curSecs;
+  if (diff < -3600) diff += 86400;
+  return Math.round(diff / 60);
+}
+
+function minsLabel(mins) {
+  if (mins <= 0) return '発車中';
+  if (mins === 1) return 'あと1分';
+  return `あと${mins}分`;
+}
+
+function renderCard(headsign, deps) {
+  const cur = nowSecs();
+  const upcoming = deps
+    .map(d => ({ time: secsToHHMM(d.departureSecs), mins: minsUntil(d.departureSecs, cur) }))
+    .filter(d => d.mins >= -1)
+    .slice(0, 5);
+
+  const emptyMsg = deps.length === 0
+    ? '本日の便はありません'
+    : '本日の便は終了しました';
+
+  const inner = upcoming.length === 0
+    ? `<div class="empty">${emptyMsg}</div>`
+    : `<div class="next-time">${upcoming[0].time}</div>
+       <div class="next-mins">${minsLabel(upcoming[0].mins)}</div>
+       <div class="upcoming">
+         ${upcoming.slice(1).map(d =>
+           `<div class="upcoming-row">
+              <span>${d.time}</span>
+              <span class="upcoming-mins">${minsLabel(d.mins)}</span>
+            </div>`
+         ).join('')}
+       </div>`;
+
+  return `<div class="dir-card">
+    <div class="dir-label">行き先</div>
+    <div class="dir-name">${headsign}</div>
+    ${inner}
+  </div>`;
+}
+
+async function load() {
+  const icon = document.getElementById('refresh-icon');
+  icon.classList.add('spinning');
+
+  try {
+    const res = await fetch(API);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const aome = data.departures.filter(d => d.headsign === '青梅駅前');
+    const yoshino = data.departures.filter(d => d.headsign === '吉野');
+
+    document.getElementById('main').innerHTML =
+      renderCard('青梅駅前', aome) + renderCard('吉野', yoshino);
+
+    const now = new Date();
+    document.getElementById('updated').textContent =
+      `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} 現在`;
+  } catch (e) {
+    document.getElementById('main').innerHTML =
+      `<div class="error-state">データの取得に失敗しました<br><small>${e.message}</small></div>`;
+    document.getElementById('updated').textContent = '';
+  } finally {
+    icon.classList.remove('spinning');
+  }
+}
+
+load();
+setInterval(load, 60000);
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+</body>
+</html>

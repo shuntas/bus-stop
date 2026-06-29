@@ -1,0 +1,22 @@
+{
+  "name": "上郷バス停",
+  "short_name": "上郷バス",
+  "description": "都営バス 梅76丙 上郷バス停の時刻表",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f8f8f7",
+  "theme_color": "#E60174",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
