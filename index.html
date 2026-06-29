@@ -3,25 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>上郷バス停</title>
-  <meta name="description" content="都営バス 梅76丙 上郷バス停の時刻表">
+  <title>バス時刻表</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#E60174">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="上郷バス">
+  <meta name="apple-mobile-web-app-title" content="バス時刻表">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --pink: #E60174;
-      --pink-light: #fce8f3;
       --bg: #f8f8f7;
       --surface: #ffffff;
       --text: #1a1a1a;
       --text-sub: #666;
       --text-muted: #999;
       --border: rgba(0,0,0,0.08);
+      --border-strong: rgba(0,0,0,0.15);
       --radius: 16px;
     }
 
@@ -31,9 +30,9 @@
         --surface: #1e1e1e;
         --text: #f0f0f0;
         --text-sub: #aaa;
-        --text-muted: #666;
+        --text-muted: #555;
         --border: rgba(255,255,255,0.08);
-        --pink-light: #2a0014;
+        --border-strong: rgba(255,255,255,0.15);
       }
     }
 
@@ -46,6 +45,7 @@
       flex-direction: column;
     }
 
+    /* ヘッダー */
     header {
       padding: 20px 20px 0;
       display: flex;
@@ -53,49 +53,112 @@
       justify-content: space-between;
     }
 
-    .stop-info { display: flex; align-items: center; gap: 10px; }
-
-    .route-badge {
-      background: var(--pink);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 20px;
-      letter-spacing: 0.03em;
-    }
-
     h1 {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-sub);
     }
 
     .refresh-btn {
       background: none;
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-strong);
       border-radius: 10px;
-      padding: 8px 14px;
+      padding: 7px 13px;
       font-size: 13px;
       color: var(--text-sub);
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       -webkit-tap-highlight-color: transparent;
     }
-    .refresh-btn:active { opacity: 0.6; }
+    .refresh-btn:active { opacity: 0.5; }
     .refresh-btn svg { width: 14px; height: 14px; }
+
+    /* コントロール */
+    .controls {
+      padding: 14px 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      min-width: 36px;
+      flex-shrink: 0;
+    }
+
+    select, input[type="time"] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 15px;
+      color: var(--text);
+      font-family: inherit;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+    }
+    select:focus, input[type="time"]:focus {
+      border-color: var(--pink);
+    }
+
+    /* バス停選択行の右側 */
+    .stop-row-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .edit-btn {
+      background: none;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .edit-btn:active { opacity: 0.5; }
+
+    .search-btn {
+      background: var(--pink);
+      border: none;
+      border-radius: 10px;
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .search-btn:active { opacity: 0.8; }
 
     .updated {
       font-size: 12px;
       color: var(--text-muted);
       padding: 8px 20px 0;
+      text-align: right;
     }
 
+    /* 結果 */
     main {
       flex: 1;
-      padding: 16px 20px 40px;
+      padding: 14px 20px 40px;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
@@ -107,89 +170,143 @@
       border-radius: var(--radius);
       border: 1px solid var(--border);
       padding: 16px;
-      min-height: 200px;
+      min-height: 180px;
     }
 
-    .dir-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: 2px;
-    }
-
+    .dir-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
     .dir-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 12px;
+      font-size: 14px; font-weight: 600; color: var(--text);
+      padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 10px;
     }
 
-    .next-time {
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 1;
-      color: var(--text);
-    }
-
-    .next-mins {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--pink);
-      margin-top: 4px;
-      margin-bottom: 12px;
-    }
+    .next-time { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+    .next-mins { font-size: 13px; font-weight: 600; color: var(--pink); margin-top: 4px; margin-bottom: 10px; }
 
     .upcoming { display: flex; flex-direction: column; gap: 5px; }
-
     .upcoming-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      color: var(--text-sub);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; color: var(--text-sub);
     }
+    .upcoming-mins { font-size: 11px; color: var(--text-muted); }
+    .empty { font-size: 13px; color: var(--text-muted); padding-top: 4px; }
 
-    .upcoming-mins {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .empty {
-      font-size: 13px;
-      color: var(--text-muted);
-      padding-top: 4px;
-    }
-
-    .loading-state {
+    .state-msg {
       grid-column: 1 / -1;
       text-align: center;
       padding: 3rem;
       color: var(--text-muted);
       font-size: 14px;
     }
+    .state-msg.error { color: #c0392b; }
 
-    .error-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 2rem;
-      color: #c0392b;
-      font-size: 14px;
+    /* 登録管理モーダル */
+    .modal-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      align-items: flex-end;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-height: 80dvh;
+      overflow-y: auto;
+      padding: 0 0 40px;
     }
 
+    .modal-header {
+      position: sticky; top: 0;
+      background: var(--surface);
+      padding: 16px 20px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 16px; font-weight: 600; }
+    .modal-close {
+      background: none; border: none;
+      font-size: 22px; color: var(--text-muted); cursor: pointer;
+      padding: 4px 8px;
+      line-height: 1;
+    }
+
+    .stop-list { padding: 12px 20px; display: flex; flex-direction: column; gap: 4px; }
+
+    .stop-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .stop-item-name { flex: 1; font-size: 15px; }
+    .stop-item-id { font-size: 11px; color: var(--text-muted); }
+
+    .stop-delete {
+      background: none; border: none;
+      color: var(--text-muted); font-size: 18px;
+      cursor: pointer; padding: 4px 6px; line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .stop-delete:active { color: #c0392b; }
+
+    .add-form {
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .add-form-title { font-size: 13px; color: var(--text-muted); padding-top: 4px; }
+
+    .search-input-wrap { position: relative; }
+    .search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 15px;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--pink); }
+
+    .suggest-list {
+      display: none;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .suggest-list.open { display: flex; }
+
+    .suggest-item {
+      padding: 11px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .suggest-item:last-child { border-bottom: none; }
+    .suggest-item:active { background: var(--bg); }
+    .suggest-item-sub { font-size: 11px; color: var(--text-muted); }
+
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spinning { animation: spin 1s linear infinite; }
+    .spinning { animation: spin 0.8s linear infinite; }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="stop-info">
-    <span class="route-badge">梅76丙</span>
-    <h1>上郷</h1>
-  </div>
-  <button class="refresh-btn" id="refresh-btn" onclick="load()" aria-label="更新">
+  <h1>バス時刻表</h1>
+  <button class="refresh-btn" onclick="search()" aria-label="更新">
     <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
       <path d="M3 3v5h5"/>
@@ -198,100 +315,285 @@
   </button>
 </header>
 
+<div class="controls">
+  <div class="control-row">
+    <span class="control-label">バス停</span>
+    <div class="stop-row-right">
+      <select id="stop-select" onchange="onStopChange()"></select>
+      <button class="edit-btn" onclick="openModal()" aria-label="バス停を編集">✎</button>
+    </div>
+  </div>
+  <div class="control-row">
+    <span class="control-label">出発</span>
+    <input type="time" id="time-input">
+  </div>
+  <button class="search-btn" onclick="search()">この時刻以降を表示</button>
+</div>
+
 <div class="updated" id="updated"></div>
 
 <main id="main">
-  <div class="loading-state">読み込み中...</div>
+  <div class="state-msg">バス停を選んで検索してください</div>
 </main>
 
-<script>
-const STOP_ID = "mdb-3175-part-07:0350";
-const API = `https://api.transit.ls8h.com/api/v1/stations/${encodeURIComponent(STOP_ID)}/departures`;
+<!-- 登録管理モーダル -->
+<div class="modal-backdrop" id="modal" onclick="onBackdropClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">バス停を管理</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="stop-list" id="stop-list"></div>
+    <div class="add-form">
+      <div class="add-form-title">バス停を追加</div>
+      <div class="search-input-wrap">
+        <input class="search-input" id="add-input" type="text" placeholder="バス停名を入力..."
+          oninput="onAddInput()" autocomplete="off">
+      </div>
+      <div class="suggest-list" id="suggest-list"></div>
+    </div>
+  </div>
+</div>
 
-function nowSecs() {
+<script>
+// ---- データ ----
+const STORAGE_KEY = 'bus-stops-v1';
+const SELECTED_KEY = 'bus-selected-v1';
+
+function loadStops() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveStops(stops) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(stops));
+}
+
+function loadSelected() {
+  return localStorage.getItem(SELECTED_KEY) || '';
+}
+
+function saveSelected(id) {
+  localStorage.setItem(SELECTED_KEY, id);
+}
+
+let stops = loadStops();
+
+// デフォルトとして上郷を入れておく
+if (stops.length === 0) {
+  stops = [{ id: 'mdb-3175-part-07:0350', name: '上郷', feedName: '都営バス' }];
+  saveStops(stops);
+}
+
+// ---- 時刻ユーティリティ ----
+function nowHHMM() {
   const n = new Date();
-  return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+  return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
 }
 
 function secsToHHMM(s) {
   const norm = ((s % 86400) + 86400) % 86400;
-  const h = Math.floor(norm / 3600);
-  const m = Math.floor((norm % 3600) / 60);
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  return `${String(Math.floor(norm/3600)).padStart(2,'0')}:${String(Math.floor((norm%3600)/60)).padStart(2,'0')}`;
 }
 
-function minsUntil(depSecs, curSecs) {
-  let diff = depSecs - curSecs;
-  if (diff < -3600) diff += 86400;
-  return Math.round(diff / 60);
+function nowSecs() {
+  const n = new Date();
+  return n.getHours()*3600 + n.getMinutes()*60 + n.getSeconds();
 }
 
-function minsLabel(mins) {
-  if (mins <= 0) return '発車中';
-  if (mins === 1) return 'あと1分';
-  return `あと${mins}分`;
+function minsUntil(depSecs, baseSecs) {
+  let d = depSecs - baseSecs;
+  if (d < -3600) d += 86400;
+  return Math.round(d / 60);
 }
 
-function renderCard(headsign, deps) {
-  const cur = nowSecs();
-  const upcoming = deps
-    .map(d => ({ time: secsToHHMM(d.departureSecs), mins: minsUntil(d.departureSecs, cur) }))
-    .filter(d => d.mins >= -1)
-    .slice(0, 5);
-
-  const emptyMsg = deps.length === 0
-    ? '本日の便はありません'
-    : '本日の便は終了しました';
-
-  const inner = upcoming.length === 0
-    ? `<div class="empty">${emptyMsg}</div>`
-    : `<div class="next-time">${upcoming[0].time}</div>
-       <div class="next-mins">${minsLabel(upcoming[0].mins)}</div>
-       <div class="upcoming">
-         ${upcoming.slice(1).map(d =>
-           `<div class="upcoming-row">
-              <span>${d.time}</span>
-              <span class="upcoming-mins">${minsLabel(d.mins)}</span>
-            </div>`
-         ).join('')}
-       </div>`;
-
-  return `<div class="dir-card">
-    <div class="dir-label">行き先</div>
-    <div class="dir-name">${headsign}</div>
-    ${inner}
-  </div>`;
+function minsLabel(m) {
+  if (m <= 0) return '発車中';
+  if (m === 1) return 'あと1分';
+  return `あと${m}分`;
 }
 
-async function load() {
+// ---- プルダウン描画 ----
+function renderSelect() {
+  const sel = document.getElementById('stop-select');
+  const current = loadSelected();
+  sel.innerHTML = stops.map(s =>
+    `<option value="${s.id}" ${s.id === current ? 'selected' : ''}>${s.name}</option>`
+  ).join('');
+  if (stops.length === 0) {
+    sel.innerHTML = '<option value="">― バス停未登録 ―</option>';
+  }
+}
+
+function onStopChange() {
+  const id = document.getElementById('stop-select').value;
+  saveSelected(id);
+}
+
+// ---- 検索 ----
+async function search() {
+  const stopId = document.getElementById('stop-select').value;
+  if (!stopId) return;
+
+  const timeVal = document.getElementById('time-input').value || nowHHMM();
+  const [hh, mm] = timeVal.split(':').map(Number);
+  const baseSecs = hh * 3600 + mm * 60;
+
   const icon = document.getElementById('refresh-icon');
   icon.classList.add('spinning');
+  document.getElementById('main').innerHTML = '<div class="state-msg">読み込み中...</div>';
+
+  const url = `https://api.transit.ls8h.com/api/v1/stations/${encodeURIComponent(stopId)}/departures?time=${timeVal}&limit=40`;
 
   try {
-    const res = await fetch(API);
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
-    const aome = data.departures.filter(d => d.headsign === '青梅駅前');
-    const yoshino = data.departures.filter(d => d.headsign === '吉野');
+    // 行き先ごとにグループ化
+    const groups = {};
+    for (const d of data.departures) {
+      const key = d.headsign || '(不明)';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(d);
+    }
 
-    document.getElementById('main').innerHTML =
-      renderCard('青梅駅前', aome) + renderCard('吉野', yoshino);
+    if (Object.keys(groups).length === 0) {
+      document.getElementById('main').innerHTML =
+        '<div class="state-msg">この時刻以降の便はありません</div>';
+    } else {
+      document.getElementById('main').innerHTML =
+        Object.entries(groups).map(([headsign, deps]) => renderCard(headsign, deps, baseSecs)).join('');
+    }
 
     const now = new Date();
     document.getElementById('updated').textContent =
       `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} 現在`;
+
   } catch (e) {
     document.getElementById('main').innerHTML =
-      `<div class="error-state">データの取得に失敗しました<br><small>${e.message}</small></div>`;
+      `<div class="state-msg error">データの取得に失敗しました<br><small>${e.message}</small></div>`;
     document.getElementById('updated').textContent = '';
   } finally {
     icon.classList.remove('spinning');
   }
 }
 
-load();
-setInterval(load, 60000);
+function renderCard(headsign, deps, baseSecs) {
+  const items = deps.slice(0, 5).map(d => ({
+    time: secsToHHMM(d.departureSecs),
+    mins: minsUntil(d.departureSecs, baseSecs)
+  }));
+
+  const next = items[0];
+  const rest = items.slice(1);
+
+  return `<div class="dir-card">
+    <div class="dir-label">行き先</div>
+    <div class="dir-name">${headsign}</div>
+    <div class="next-time">${next.time}</div>
+    <div class="next-mins">${minsLabel(next.mins)}</div>
+    <div class="upcoming">
+      ${rest.map(d => `<div class="upcoming-row">
+        <span>${d.time}</span>
+        <span class="upcoming-mins">${minsLabel(d.mins)}</span>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ---- モーダル ----
+function openModal() {
+  renderStopList();
+  document.getElementById('add-input').value = '';
+  document.getElementById('suggest-list').classList.remove('open');
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  renderSelect();
+}
+
+function onBackdropClick(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+function renderStopList() {
+  const el = document.getElementById('stop-list');
+  if (stops.length === 0) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">登録済みのバス停はありません</div>';
+    return;
+  }
+  el.innerHTML = stops.map((s, i) => `
+    <div class="stop-item">
+      <div>
+        <div class="stop-item-name">${s.name}</div>
+        <div class="stop-item-id">${s.feedName || ''}</div>
+      </div>
+      <button class="stop-delete" onclick="deleteStop(${i})" aria-label="${s.name}を削除">×</button>
+    </div>
+  `).join('');
+}
+
+function deleteStop(i) {
+  stops.splice(i, 1);
+  saveStops(stops);
+  renderStopList();
+}
+
+// ---- バス停検索・追加 ----
+let suggestTimer = null;
+
+async function onAddInput() {
+  const q = document.getElementById('add-input').value.trim();
+  const list = document.getElementById('suggest-list');
+
+  if (q.length < 1) { list.classList.remove('open'); return; }
+
+  clearTimeout(suggestTimer);
+  suggestTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`https://api.transit.ls8h.com/api/v1/locations/suggest?q=${encodeURIComponent(q)}&limit=6`);
+      const data = await res.json();
+      const stations = data.stations || [];
+
+      if (stations.length === 0) {
+        list.classList.remove('open');
+        return;
+      }
+
+      list.innerHTML = stations.map(s => `
+        <div class="suggest-item" onclick="addStop(${JSON.stringify(JSON.stringify(s))})">
+          <span>${s.name}</span>
+          <span class="suggest-item-sub">${s.feedName} / ${s.id}</span>
+        </div>
+      `).join('');
+      list.classList.add('open');
+    } catch { list.classList.remove('open'); }
+  }, 300);
+}
+
+function addStop(jsonStr) {
+  const s = JSON.parse(jsonStr);
+  if (stops.find(x => x.id === s.id)) {
+    document.getElementById('add-input').value = '';
+    document.getElementById('suggest-list').classList.remove('open');
+    return;
+  }
+  stops.push({ id: s.id, name: s.name, feedName: s.feedName });
+  saveStops(stops);
+  document.getElementById('add-input').value = '';
+  document.getElementById('suggest-list').classList.remove('open');
+  renderStopList();
+}
+
+// ---- 初期化 ----
+renderSelect();
+document.getElementById('time-input').value = nowHHMM();
+
+// 保存済みバス停があれば自動検索
+if (stops.length > 0) search();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
